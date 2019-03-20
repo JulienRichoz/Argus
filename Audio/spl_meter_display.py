@@ -5,6 +5,7 @@ import spl_lib as spl
 from scipy.signal import lfilter
 import numpy
 import time
+from storeData import StoreDB
 
 
 ''' The following is similar to a basic CD quality
@@ -32,6 +33,7 @@ NUMERATOR, DENOMINATOR = spl.A_weighting(RATE)
 Listen to mic
 '''
 pa = pyaudio.PyAudio()
+store = StoreDB()
 
 stream = pa.open(format = FORMAT,
                 channels = CHANNEL,
@@ -57,6 +59,10 @@ def listen(error_count=0):
             y = lfilter(NUMERATOR, DENOMINATOR, decoded_block)
             new_decibel = 20*numpy.log10(spl.rms_flat(y))
             print('A-weighted: {:+.2f} dB'.format(new_decibel))
+            store.store(new_decibel)
+
+        # sleep 1 second
+        time.sleep(1)
             
     stream.stop_stream()
     stream.close()
