@@ -1,6 +1,6 @@
 # Microphone Intensity Listen and Record
 
-Argus server use spl_meter_window.py application to listen and record in database microphone intensity values written in python language.
+Argus server use spl_meter_window.py or spl_meter_display.py application to listen and record in database microphone intensity values. All applications are written in python language.
 
 ## Install
 In order to use spl_meter_window you must install all necessary python dependencies.
