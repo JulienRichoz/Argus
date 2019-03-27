@@ -19,4 +19,3 @@ class StoreDB:
         #execute query
         self.cursor.execute(sql, (date, value))
         self.db.commit()
-        print("record inserted")
