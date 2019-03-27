@@ -73,7 +73,6 @@ def listen(lableIntensity, lableRecording):
             ## This is where you apply A-weighted filter
             y = lfilter(NUMERATOR, DENOMINATOR, decoded_block)
             new_decibel = 20*numpy.log10(spl.rms_flat(y))
-            print(canStore)
             if canStore:
                 store.store(new_decibel)
 
@@ -131,6 +130,8 @@ button.place(x=85, y=150)
 # use the listen to get intensity in real time
 listen(lableIntensity, lableRecording)
 
+os.system("clear")
+print("Microphine listening....")
 # open windows and listen intensity
 tk.mainloop()
 
