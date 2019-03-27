@@ -1,3 +1,8 @@
+# spl_meter_window
+# show intensity mic in Db and store values in databse
+# Carboni Davide
+# v1.0
+
 import tkinter as tk
 import  tkinter.font
 import os, errno
@@ -34,7 +39,7 @@ Listen to mic
 '''
 pa = pyaudio.PyAudio()
 store = StoreDB()
-canStore = True
+canStore = False
 
 # audio stream
 stream = pa.open(format = FORMAT,
@@ -43,23 +48,24 @@ stream = pa.open(format = FORMAT,
                 input = True,
                 frames_per_buffer = CHUNK)
 
-# button text to active o desactivate store in Db
-buttonText = tk.StringVar()
-
 #program exit
 def exit():
     win.quit()
 
-def listen(label):
-    
+def listen(lableIntensity, lableRecording):
+
+    global canStore
+
     def getIntensity():
+
+        global canStore
 
         try:
             ## read() returns string. You need to decode it into an array later.
             block = stream.read(CHUNK,  exception_on_overflow = False)
         except IOError as e:
-            label.config(" (%d) Error recording: %s" % (e))
-            label.after(100, new_decibel)
+            lableIntensity.config(" (%d) Error recording: %s" % (e))
+            lableIntensity.after(100, new_decibel)
         else:
             ## Int16 is a numpy data type which is Integer (-32768 to 32767)
             ## If you put Int8 or Int32, the result numbers will be ridiculous
@@ -67,45 +73,63 @@ def listen(label):
             ## This is where you apply A-weighted filter
             y = lfilter(NUMERATOR, DENOMINATOR, decoded_block)
             new_decibel = 20*numpy.log10(spl.rms_flat(y))
+            print(canStore)
             if canStore:
                 store.store(new_decibel)
-            label.config(text='A-weighted: {:+.2f} dB'.format(new_decibel))
-            label.after(1000, getIntensity)
+
+            lableIntensity.config(text='A-weighted: {:+.2f} dB'.format(new_decibel))
+            lableIntensity.after(1000, getIntensity)            
 
     # get next intensity value
     getIntensity()
+    return
             
 def update_btn_text():
+
+    global canStore
+    global buttonText
+    global lableRecording
+
+    # change recording status
     if canStore:
-        buttonText = "Stop Record"
+        buttonText.set("Start Record")
+        lableRecording.config(text="")
         canStore = False
     else:
-        buttonText = "Start Record"
+        buttonText.set("Stop Record")
+        lableRecording.config(text="Recording...")
         canStore = True
-
+    return
 
 # define a new winodows
 win = tk.Tk()
 # define window title
 win.title("Sound Intensity")
 # define a personal font 
-myFont = tkinter.font.Font(family='Helvetica', size = 22, weight = "bold")
+myFont = tkinter.font.Font(family='Helvetica', size = 42, weight = "bold")
 # Define static window (no resize)
 win.resizable(width=False, height=False)
 #define windows size
-win.geometry("400x300")
-#show title in window
-label = tk.Label(win)
-label.config(fontsize="20")
-label.pack()
+win.geometry("400x200")
 
-# use the listen to get intensity in real time
-listen(label)
-label.place(x=150, y=50)
+#show intensity
+lableIntensity = tk.Label(win)
+lableIntensity.config(font=("Helvetica", 26))
+lableIntensity.place(x=35, y=50)
+
+#show recording status
+lableRecording = tk.Label(win)
+lableRecording.config(font=("Helvetica", 10))
+lableRecording.place(x=35, y=100)
 
 # activate or desactivate recording data to Db
+buttonText = tk.StringVar()
 button = tk.Button(win, textvariable=buttonText, width=25, command=update_btn_text)
-button.pack()
+buttonText.set("Start Record")
+button.place(x=85, y=150)
+
+# use the listen to get intensity in real time
+listen(lableIntensity, lableRecording)
 
 # open windows and listen intensity
 tk.mainloop()
