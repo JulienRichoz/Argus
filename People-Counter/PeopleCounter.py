@@ -1,19 +1,25 @@
 import datetime
+import time
 import math
 import cv2
 import numpy as np
+import MySQLdb
+
 # global variables
 width = 0
 height = 0
 EntranceCounter = 0
 ExitCounter = 0
+datePassage = 0
 MinCountourArea = 3000  # Adjust ths value according to your usage
 BinarizationThreshold = 70  # Adjust ths value according to your usage
 OffsetRefLines = 150  # Adjust ths value according to your usage
 
+## connection DB
+db = MySQLdb.connect(host="localhost", user="root", passwd="root", db="argus")
+mycursor = db.cursor()
+
 # Check if an object in entering in monitored zone
-
-
 def CheckEntranceLineCrossing(y, CoorYEntranceLine, CoorYExitLine):
     AbsDistance = abs(y - CoorYEntranceLine)
 
@@ -30,6 +36,17 @@ def CheckExitLineCrossing(y, CoorYEntranceLine, CoorYExitLine):
         return 1
     else:
         return 0
+
+def SqlInsertDateNow():
+    datePassage = datetime.datetime.now()
+    datePassage.strftime('%Y-%m-%d %H:%M:%S')
+    sql = "INSERT INTO trafic(date) VALUES(%s)"
+    val = (datePassage)
+    mycursor.execute(sql, (datePassage, ))
+
+    db.commit()
+
+    print(mycursor.rowcount, "record inserted.")
 
 camera = cv2.VideoCapture(0)
 
@@ -97,11 +114,13 @@ while True:
         
         if (CheckEntranceLineCrossing(CoordYCentroid,CoorYEntranceLine,CoorYExitLine)):
             EntranceCounter += 1
+            SqlInsertDateNow()
 
         if (CheckExitLineCrossing(CoordYCentroid,CoorYEntranceLine,CoorYExitLine)):  
             ExitCounter += 1
-
-    print "Total countours found: "+str(QttyOfContours)
+            SqlInsertDateNow()
+            
+    print ("Total countours found: {}".format(str(QttyOfContours)))
 
     # Write entrance and exit counter values on frame and shows it
     cv2.putText(Frame, "Entrances: {}".format(str(EntranceCounter)), (10, 50),
@@ -109,7 +128,7 @@ while True:
     cv2.putText(Frame, "Exits: {}".format(str(ExitCounter)), (10, 70),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
     cv2.imshow("Original Frame", Frame)
-    cv2.waitKey(1);
+    cv2.waitKey(1)
 
 
 # cleanup the camera and close any open windows
