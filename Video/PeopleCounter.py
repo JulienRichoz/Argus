@@ -37,16 +37,23 @@ def CheckExitLineCrossing(y, CoorYEntranceLine, CoorYExitLine):
     else:
         return 0
 
-def SqlInsertDateNow():
+# Insert in DB the current time and picture name  when there is a trafic record
+# Store in local a captured picture
+def SqlInsertPictureDateNow():
     datePassage = datetime.datetime.now()
-    datePassage.strftime('%Y-%m-%d %H:%M:%S')
-    sql = "INSERT INTO trafic(date) VALUES(%s)"
+    datePassage = datePassage.strftime('%Y-%m-%d %H:%M:%S')
+    sql = "INSERT INTO trafic(date, img) VALUES(%s, %s)"
     val = (datePassage)
-    mycursor.execute(sql, (datePassage, ))
-
+    mycursor.execute(sql, (datePassage, datePassage+".img"))
     db.commit()
+    retval, im = camera.read()
+    while(True):
+        cv2.imwrite("./pictures/"+datePassage+".png", im)
+        print("Save image!")
+	break
+    print("record inserted.")
 
-    print(mycursor.rowcount, "record inserted.")
+
 
 camera = cv2.VideoCapture(0)
 
@@ -114,14 +121,12 @@ while True:
         
         if (CheckEntranceLineCrossing(CoordYCentroid,CoorYEntranceLine,CoorYExitLine)):
             EntranceCounter += 1
-            SqlInsertDateNow()
-
+            SqlInsertPictureDateNow()
+	   
         if (CheckExitLineCrossing(CoordYCentroid,CoorYEntranceLine,CoorYExitLine)):  
             ExitCounter += 1
-            SqlInsertDateNow()
-            
-    print ("Total countours found: {}".format(str(QttyOfContours)))
-
+            SqlInsertPictureDateNow()
+	   
     # Write entrance and exit counter values on frame and shows it
     cv2.putText(Frame, "Entrances: {}".format(str(EntranceCounter)), (10, 50),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (250, 0, 1), 2)
