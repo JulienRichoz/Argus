@@ -10,3 +10,9 @@ The video application counts everytime people walk in a zone, take an image and 
 The sound application records the sound (dB) in a local database.
 
 - [Audio Readme](./Audio/doc/readme.md)
+
+## Project Manager Tool
+
+We have used Trello to manage our project. 
+
+- [Trello](https://trello.com/it/login)
