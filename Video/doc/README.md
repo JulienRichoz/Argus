@@ -39,12 +39,25 @@ sudo make install
 sudo ldconfig
 ```
 ## How to Use
+### PeopleCounter
+
+Script with 2 lines detector (exits and entrance in border of the screen).
+
 Go in the folder where is the script:
 ```sh
 cd ~/Video
-sudo python people_counter.py
+sudo python peopleCounter.py
 ```
 
+### PeopleCounter2
+
+Script with 1 line detector in the middle of the screen.
+
+Go in the folder where is the script:
+```sh
+cd ~/Video
+sudo python peopleCounter2.py
+```
 You need to use sudo or give the right to write, because it will create the image in the pictures folder.
 ## What it does
 The camera is now launched and everytime a people will go through an exit or entrance line, it will store the date in the database.
